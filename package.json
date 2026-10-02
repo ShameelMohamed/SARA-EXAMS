@@ -1,0 +1,56 @@
+{
+  "name": "sara-exams",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "main": "dist/electron/main/index.js",
+  "scripts": {
+    "dev": "vite",
+    "secure-exam:start": "tsc -p tsconfig.electron.json && electron .",
+    "secure-exam:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5176 && npm run secure-exam:start\"",
+    "secure-exam:build": "npm run build && tsc -p tsconfig.electron.json && electron-builder",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.saraexams.securelauncher",
+    "productName": "SARA EXAMS Secure Exam",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "public/LOGO.png"
+    },
+    "protocols": [
+      {
+        "name": "SARA EXAMS Secure Exam Launcher Protocol",
+        "schemes": ["saraexam"]
+      }
+    ]
+  },
+  "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
+    "dexie": "^4.4.6",
+    "firebase": "^12.19.0",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.49.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^6.1.1",
+    "electron": "^44.5.0",
+    "oxlint": "^1.81.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0"
+  }
+}
