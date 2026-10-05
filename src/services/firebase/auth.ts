@@ -40,7 +40,6 @@ export async function determineUserRole(_uid: string, email: string | null): Pro
 
 export async function signInWithGoogle(): Promise<{ profile: UserProfile | null; error: string | null }> {
   try {
-    const { signInWithPopup } = await import('firebase/auth');
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
     const email = user.email;
