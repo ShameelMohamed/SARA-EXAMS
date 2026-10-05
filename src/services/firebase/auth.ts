@@ -43,8 +43,42 @@ export async function signInWithGoogle(): Promise<{ profile: UserProfile | null;
     await signInWithRedirect(auth, googleProvider);
     return { profile: null, error: null };
   } catch (error: any) {
-    console.error('Google Sign-In Redirect Error:', error);
-    return { profile: null, error: error.message || 'Failed to initiate Google sign-in redirect.' };
+    console.warn('signInWithRedirect failed, attempting popup fallback:', error);
+    try {
+      const { signInWithPopup } = await import('firebase/auth');
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      const email = user.email;
+      if (!email) {
+        await firebaseSignOut(auth);
+        return { profile: null, error: 'No email address associated with this Google account.' };
+      }
+      const role = await determineUserRole(user.uid, email);
+      if (!role) {
+        await firebaseSignOut(auth);
+        const isStudentAttempt = email.includes('saranathan.ac.in');
+        return {
+          profile: null,
+          error: isStudentAttempt
+            ? 'Students must use an official Saranathan CSE Google account (e.g., cse*@saranathan.ac.in).'
+            : 'Access denied. Your account is not authorized as a Teacher or Admin.'
+        };
+      }
+      const profile: UserProfile = {
+        uid: user.uid,
+        email,
+        displayName: user.displayName || email.split('@')[0],
+        role,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        active: true
+      };
+      await setDoc(doc(db, 'users', user.uid), profile, { merge: true });
+      return { profile, error: null };
+    } catch (popupErr: any) {
+      console.error('Google Sign-In Error:', popupErr);
+      return { profile: null, error: popupErr.message || 'Failed to sign in with Google.' };
+    }
   }
 }
 
