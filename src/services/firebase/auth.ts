@@ -1,5 +1,6 @@
 import { 
-  signInWithPopup, 
+  signInWithRedirect, 
+  getRedirectResult,
   signOut as firebaseSignOut, 
   onAuthStateChanged 
 } from 'firebase/auth';
@@ -39,7 +40,19 @@ export async function determineUserRole(_uid: string, email: string | null): Pro
 
 export async function signInWithGoogle(): Promise<{ profile: UserProfile | null; error: string | null }> {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
+    await signInWithRedirect(auth, googleProvider);
+    return { profile: null, error: null };
+  } catch (error: any) {
+    console.error('Google Sign-In Redirect Error:', error);
+    return { profile: null, error: error.message || 'Failed to initiate Google sign-in redirect.' };
+  }
+}
+
+export async function handleGoogleRedirectResult(): Promise<{ profile: UserProfile | null; error: string | null }> {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return { profile: null, error: null };
+
     const user = result.user;
     const email = user.email;
 
@@ -80,8 +93,8 @@ export async function signInWithGoogle(): Promise<{ profile: UserProfile | null;
 
     return { profile, error: null };
   } catch (error: any) {
-    console.error('Google Sign-In Error:', error);
-    return { profile: null, error: error.message || 'Failed to sign in with Google.' };
+    console.error('Google Redirect Auth Error:', error);
+    return { profile: null, error: error.message || 'Failed to process Google sign-in redirect.' };
   }
 }
 

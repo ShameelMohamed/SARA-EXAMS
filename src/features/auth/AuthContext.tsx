@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from 'firebase/auth';
-import { subscribeToAuthChanges, determineUserRole, logoutUser } from '../../services/firebase/auth';
+import { subscribeToAuthChanges, determineUserRole, logoutUser, handleGoogleRedirectResult } from '../../services/firebase/auth';
 import type { UserProfile, UserRole } from '../../types';
 
 interface AuthContextType {
@@ -31,6 +31,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Process Google redirect result if returning from Firebase Auth redirect
+    handleGoogleRedirectResult().then(({ error }) => {
+      if (error) setError(error);
+    }).catch((err) => {
+      console.error('Redirect auth handling error:', err);
+    });
+
     const unsubscribe = subscribeToAuthChanges(async (fbUser) => {
       setUser(fbUser);
       if (fbUser && fbUser.email) {
