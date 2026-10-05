@@ -93,6 +93,11 @@ export async function handleGoogleRedirectResult(): Promise<{ profile: UserProfi
 
     return { profile, error: null };
   } catch (error: any) {
+    // Ignore network-request-failed if no redirect was active or iframe was blocked
+    if (error?.code === 'auth/network-request-failed' || error?.code === 'auth/null-user') {
+      console.debug('No pending redirect auth result found:', error);
+      return { profile: null, error: null };
+    }
     console.error('Google Redirect Auth Error:', error);
     return { profile: null, error: error.message || 'Failed to process Google sign-in redirect.' };
   }
