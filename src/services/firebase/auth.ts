@@ -81,6 +81,9 @@ export async function signInWithGoogle(): Promise<{ profile: UserProfile | null;
 
     return { profile, error: null };
   } catch (error: any) {
+    if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+      return { profile: null, error: 'Sign-in cancelled or window closed.' };
+    }
     console.error('Google Sign-In Error:', error);
     return { profile: null, error: error.message || 'Failed to sign in with Google.' };
   }
