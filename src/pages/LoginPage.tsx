@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { GraduationCap, AlertCircle } from 'lucide-react';
 import { signInWithGoogle } from '../services/firebase/auth';
@@ -11,29 +11,34 @@ export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { role, error: authContextError } = useAuth();
 
-  React.useEffect(() => {
-    if (role === 'ADMIN') navigate('/admin', { replace: true });
-    else if (role === 'TEACHER') navigate('/teacher', { replace: true });
-    else if (role === 'STUDENT') navigate('/student', { replace: true });
-  }, [role, navigate]);
+  // (import moved to top)
+
+const hasNavigated = useRef(false);
+React.useEffect(() => {
+  if (hasNavigated.current) return;
+  if (role === 'ADMIN') navigate('/admin', { replace: true });
+  else if (role === 'TEACHER') navigate('/teacher', { replace: true });
+  else if (role === 'STUDENT') navigate('/student', { replace: true });
+  if (role) hasNavigated.current = true;
+}, [role, navigate]);
 
   const handleGoogleSignIn = async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    const { profile, error } = await signInWithGoogle();
-    setLoading(false);
+  setLoading(true);
+  setErrorMsg(null);
+  const { profile, error } = await signInWithGoogle();
+  setLoading(false);
 
-    if (error) {
-      setErrorMsg(error);
-      return;
-    }
+  if (error) {
+    setErrorMsg(error);
+    return;
+  }
 
-    if (profile) {
-      if (profile.role === 'ADMIN') navigate('/admin', { replace: true });
-      else if (profile.role === 'TEACHER') navigate('/teacher', { replace: true });
-      else if (profile.role === 'STUDENT') navigate('/student', { replace: true });
-    }
-  };
+  if (profile) {
+    // Reset navigation guard to allow role-based redirect
+    hasNavigated.current = false;
+    // Role change will trigger the useEffect navigation
+  }
+};
 
   // @ts-ignore
   if (typeof window !== 'undefined' && window.electronAPI) {

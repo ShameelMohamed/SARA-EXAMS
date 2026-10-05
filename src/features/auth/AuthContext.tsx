@@ -47,6 +47,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!isMounted) return;
 
       if (fbUser && fbUser.email) {
+        setUser(fbUser);
         setLoading(true);
         console.log('[AuthContext] Authenticated user email:', fbUser.email);
         const resolvedRole = await determineUserRole(fbUser.uid, fbUser.email);
