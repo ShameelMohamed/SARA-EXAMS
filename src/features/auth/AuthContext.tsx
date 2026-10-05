@@ -31,18 +31,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Process Google redirect result if returning from Firebase Auth redirect
+    let isMounted = true;
+
+    // 1. Handle redirect auth result if user just returned from Google redirect
     handleGoogleRedirectResult().then(({ error }) => {
-      if (error) setError(error);
+      if (isMounted && error) {
+        setError(error);
+      }
     }).catch((err) => {
       console.error('Redirect auth handling error:', err);
     });
 
+    // 2. Listen to Firebase auth state changes
     const unsubscribe = subscribeToAuthChanges(async (fbUser) => {
-      setUser(fbUser);
+      if (!isMounted) return;
+
       if (fbUser && fbUser.email) {
         setLoading(true);
         const resolvedRole = await determineUserRole(fbUser.uid, fbUser.email);
+        
+        if (!isMounted) return;
+
         if (resolvedRole) {
           setRole(resolvedRole);
           setProfile({
@@ -54,8 +63,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             updatedAt: new Date().toISOString(),
             active: true
           });
+          setError(null);
         } else {
-          setError('Unauthorized account. Please sign in using your Saranathan CSE Google account.');
+          const isStudentAttempt = fbUser.email.toLowerCase().includes('saranathan.ac.in');
+          const errorMsg = isStudentAttempt
+            ? 'Students must use an official Saranathan CSE Google account (e.g., cse*@saranathan.ac.in).'
+            : 'Access denied. Your account is not authorized as a Teacher or Admin.';
+          setError(errorMsg);
           setRole(null);
           setProfile(null);
           await logoutUser();
@@ -69,7 +83,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const handleLogout = async () => {

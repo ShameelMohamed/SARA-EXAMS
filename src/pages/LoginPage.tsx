@@ -9,7 +9,7 @@ export const LoginPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const navigate = useNavigate();
-  const { role } = useAuth();
+  const { role, error: authContextError } = useAuth();
 
   React.useEffect(() => {
     if (role === 'ADMIN') navigate('/admin', { replace: true });
@@ -88,10 +88,10 @@ export const LoginPage: React.FC = () => {
             </p>
           </div>
 
-          {errorMsg && (
+          {(errorMsg || authContextError) && (
             <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3 text-red-700 text-xs">
               <AlertCircle className="w-5 h-5 shrink-0 text-red-600 mt-0.5" />
-              <div className="leading-relaxed font-medium">{errorMsg}</div>
+              <div className="leading-relaxed font-medium">{errorMsg || authContextError}</div>
             </div>
           )}
 
