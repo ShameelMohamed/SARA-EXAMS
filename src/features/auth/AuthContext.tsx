@@ -48,7 +48,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (fbUser && fbUser.email) {
         setLoading(true);
+        console.log('[AuthContext] Authenticated user email:', fbUser.email);
         const resolvedRole = await determineUserRole(fbUser.uid, fbUser.email);
+        console.log('[AuthContext] Resolved role:', resolvedRole);
         
         if (!isMounted) return;
 
@@ -65,10 +67,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
           setError(null);
         } else {
+          console.warn('[AuthContext] Role denied for email:', fbUser.email);
           const isStudentAttempt = fbUser.email.toLowerCase().includes('saranathan.ac.in');
           const errorMsg = isStudentAttempt
-            ? 'Students must use an official Saranathan CSE Google account (e.g., cse*@saranathan.ac.in).'
-            : 'Access denied. Your account is not authorized as a Teacher or Admin.';
+            ? `Student email (${fbUser.email}) does not match required pattern (cse*@saranathan.ac.in).`
+            : `Access denied for ${fbUser.email}. Not registered as Teacher/Admin in Firestore.`;
           setError(errorMsg);
           setRole(null);
           setProfile(null);
