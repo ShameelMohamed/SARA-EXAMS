@@ -40,45 +40,50 @@ export async function determineUserRole(_uid: string, email: string | null): Pro
 
 export async function signInWithGoogle(): Promise<{ profile: UserProfile | null; error: string | null }> {
   try {
-    await signInWithRedirect(auth, googleProvider);
-    return { profile: null, error: null };
-  } catch (error: any) {
-    console.warn('signInWithRedirect failed, attempting popup fallback:', error);
-    try {
-      const { signInWithPopup } = await import('firebase/auth');
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const email = user.email;
-      if (!email) {
-        await firebaseSignOut(auth);
-        return { profile: null, error: 'No email address associated with this Google account.' };
-      }
-      const role = await determineUserRole(user.uid, email);
-      if (!role) {
-        await firebaseSignOut(auth);
-        const isStudentAttempt = email.includes('saranathan.ac.in');
-        return {
-          profile: null,
-          error: isStudentAttempt
-            ? 'Students must use an official Saranathan CSE Google account (e.g., cse*@saranathan.ac.in).'
-            : 'Access denied. Your account is not authorized as a Teacher or Admin.'
-        };
-      }
-      const profile: UserProfile = {
-        uid: user.uid,
-        email,
-        displayName: user.displayName || email.split('@')[0],
-        role,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        active: true
-      };
-      await setDoc(doc(db, 'users', user.uid), profile, { merge: true });
-      return { profile, error: null };
-    } catch (popupErr: any) {
-      console.error('Google Sign-In Error:', popupErr);
-      return { profile: null, error: popupErr.message || 'Failed to sign in with Google.' };
+    const { signInWithPopup } = await import('firebase/auth');
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+    const email = user.email;
+
+    if (!email) {
+      await firebaseSignOut(auth);
+      return { profile: null, error: 'No email address associated with this Google account.' };
     }
+
+    const role = await determineUserRole(user.uid, email);
+
+    if (!role) {
+      await firebaseSignOut(auth);
+      const isStudentAttempt = email.includes('saranathan.ac.in');
+      const errorMsg = isStudentAttempt
+        ? `Student email (${email}) does not match required pattern (cse*@saranathan.ac.in).`
+        : `Access denied for ${email}. Not registered as Teacher or Admin in Firestore.`;
+      return { 
+        profile: null, 
+        error: errorMsg 
+      };
+    }
+
+    const profile: UserProfile = {
+      uid: user.uid,
+      email: user.email!,
+      displayName: user.displayName || user.email!.split('@')[0],
+      role,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      active: true
+    };
+
+    try {
+      await setDoc(doc(db, 'users', user.uid), profile, { merge: true });
+    } catch (err) {
+      console.warn('Could not update user doc in Firestore:', err);
+    }
+
+    return { profile, error: null };
+  } catch (error: any) {
+    console.error('Google Sign-In Error:', error);
+    return { profile: null, error: error.message || 'Failed to sign in with Google.' };
   }
 }
 
