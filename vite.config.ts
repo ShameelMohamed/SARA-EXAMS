@@ -7,10 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     port: 5176,
-    strictPort: true,
-    headers: {
-      'Cross-Origin-Opener-Policy': 'unsafe-none'
-    }
+    strictPort: true
   }
 })
 
