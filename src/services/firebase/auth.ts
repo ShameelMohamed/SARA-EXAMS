@@ -1,5 +1,5 @@
 import { 
-  signInWithRedirect, 
+  signInWithPopup,
   getRedirectResult,
   signOut as firebaseSignOut, 
   onAuthStateChanged 
