@@ -154,7 +154,7 @@ export const ExamInfoPage: React.FC = () => {
                 rel="noreferrer"
                 className="text-blue-600 hover:underline font-bold"
               >
-                Download Installer (.exe) here
+                Download Updated Installer (.exe) – includes close‑window fix
               </a>
             </p>
           </div>
