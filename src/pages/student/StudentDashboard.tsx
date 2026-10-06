@@ -28,7 +28,7 @@ export const StudentDashboard: React.FC = () => {
     if (!profile) return;
 
     setLoading(true);
-    const res = await getOrCreateExamAttempt(cleanCode, profile.uid, profile.email);
+    const res = await getOrCreateExamAttempt(cleanCode, profile.uid, profile.email, profile.displayName);
     setLoading(false);
 
     if (res.error) {

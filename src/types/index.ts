@@ -90,6 +90,7 @@ export interface ExamAttempt {
   id: string; // e.g. versionId_studentUid
   studentUid: string;
   studentEmail: string;
+  studentName?: string;
   examId: string;
   examVersionId: string;
   qpCode: string;

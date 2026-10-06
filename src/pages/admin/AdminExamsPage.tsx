@@ -51,7 +51,7 @@ export const AdminExamsPage: React.FC = () => {
     setLaunchingId(exam.id);
     setErrorMsg(null);
     try {
-      const res = await getOrCreateExamAttempt(exam.qpCode, profile.uid, profile.email, true);
+      const res = await getOrCreateExamAttempt(exam.qpCode, profile.uid, profile.email, profile.displayName, true);
       if (res.error) {
         setErrorMsg(res.error);
         return;

@@ -31,6 +31,7 @@ export async function getOrCreateExamAttempt(
   qpCode: string,
   studentUid: string,
   studentEmail: string,
+  studentName: string | null = null,
   isAdminTest: boolean = false
 ): Promise<StartAttemptResult> {
   const cleanQpCode = qpCode.trim().toUpperCase();
@@ -99,6 +100,7 @@ export async function getOrCreateExamAttempt(
         id: attemptId,
         studentUid,
         studentEmail,
+        studentName: studentName || undefined,
         examId: exam.id,
         examVersionId: versionId,
         qpCode: exam.qpCode,

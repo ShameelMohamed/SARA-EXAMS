@@ -61,7 +61,7 @@ export const AdminReportsPage: React.FC = () => {
 
   const reportRows: MinimalReportRow[] = attempts.map((a) => ({
     email: a.studentEmail,
-    fullName: (a as any).studentDisplayName || a.studentEmail.split('@')[0],
+    fullName: a.studentName || (a as any).studentDisplayName || a.studentEmail.split('@')[0],
     mark: a.score ?? 0
   }));
 
