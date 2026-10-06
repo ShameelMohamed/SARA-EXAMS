@@ -135,7 +135,6 @@ export const AdminReportsPage: React.FC = () => {
               <thead>
                 <tr className="bg-slate-100 border-b border-slate-200 text-xs font-bold text-slate-800 uppercase tracking-wider">
                   <th className="py-3 px-6 border-r border-slate-200">Full Name</th>
-                  <th className="py-3 px-6 border-r border-slate-200">Mail ID</th>
                   <th className="py-3 px-6">Mark</th>
                 </tr>
               </thead>
@@ -143,7 +142,6 @@ export const AdminReportsPage: React.FC = () => {
                 {reportRows.map((row) => (
                   <tr key={row.email} className="hover:bg-slate-50">
                     <td className="py-3 px-6 border-r border-slate-200 font-semibold text-slate-900">{row.fullName}</td>
-                    <td className="py-3 px-6 border-r border-slate-200 text-slate-700 font-mono">{row.email}</td>
                     <td className="py-3 px-6 font-bold text-blue-700 font-mono">{row.mark}</td>
                   </tr>
                 ))}

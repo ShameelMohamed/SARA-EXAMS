@@ -277,8 +277,7 @@ export const ExamInterfacePage: React.FC = () => {
         status: 'SUBMITTED',
         submittedAt: new Date().toISOString(),
         score,
-        totalMarks,
-        answers
+        totalMarks
       });
 
       setFinalResult({ score, totalMarks });

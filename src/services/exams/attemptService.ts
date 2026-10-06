@@ -108,7 +108,6 @@ export async function getOrCreateExamAttempt(
         status: 'IN_PROGRESS',
         startedAt: new Date().toISOString(),
         resultVisible: exam.resultVisibility,
-        answers: {},
         questionOrder,
         initialShuffledCodeLines
       };

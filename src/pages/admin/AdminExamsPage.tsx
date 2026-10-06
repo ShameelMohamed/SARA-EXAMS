@@ -8,14 +8,18 @@ import { db } from '../../services/firebase/config';
 import type { Exam } from '../../types';
 import { ExamStatusBadge } from '../../components/ui/ExamStatusBadge';
 import { downloadCSVTemplate } from '../../services/exams/csvParser';
+import { useAuth } from '../../features/auth/AuthContext';
+import { getOrCreateExamAttempt } from '../../services/exams/attemptService';
 
 export const AdminExamsPage: React.FC = () => {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [exams, setExams] = useState<Exam[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [targetExamToDelete, setTargetExamToDelete] = useState<Exam | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [launchingId, setLaunchingId] = useState<string | null>(null);
 
   const fetchExams = async () => {
     try {
@@ -41,6 +45,39 @@ export const AdminExamsPage: React.FC = () => {
   useEffect(() => {
     fetchExams();
   }, []);
+
+  const handleAttemptTest = async (exam: Exam) => {
+    if (!profile) return;
+    setLaunchingId(exam.id);
+    setErrorMsg(null);
+    try {
+      const res = await getOrCreateExamAttempt(exam.qpCode, profile.uid, profile.email, true);
+      if (res.error) {
+        setErrorMsg(res.error);
+        return;
+      }
+      const attempt = res.attempt!;
+      const { createLaunchToken } = await import('../../services/exams/tokenService');
+      const token = await createLaunchToken(attempt.id, attempt.studentUid, exam.id);
+      
+      const currentOrigin = window.location.origin;
+      const protocolUrl = `saraexam://start?examId=${encodeURIComponent(exam.id)}&attemptId=${encodeURIComponent(attempt.id)}&token=${encodeURIComponent(token)}&domain=${encodeURIComponent(currentOrigin)}`;
+      
+      window.location.href = protocolUrl;
+      
+      // @ts-ignore
+      if (window.electronAPI && typeof window.electronAPI.openSecureExam === 'function') {
+        const devUrl = import.meta.env.VITE_DEV_SERVER_URL || window.location.origin;
+        // @ts-ignore
+        window.electronAPI.openSecureExam(`${devUrl}/exam/${exam.id}?token=${token}`);
+      }
+    } catch (err: any) {
+      console.error('Launch failed:', err);
+      setErrorMsg('Failed to generate launch token. Please try again.');
+    } finally {
+      setLaunchingId(null);
+    }
+  };
 
   const handleDeleteExam = async () => {
     if (!targetExamToDelete) return;
@@ -76,7 +113,17 @@ export const AdminExamsPage: React.FC = () => {
         console.warn('Error deleting attempts:', e);
       }
 
-      // 4. Delete main exam doc
+      // 4. Delete launch tokens associated with exam
+      try {
+        const tSnap = await getDocs(query(collection(db, 'launchTokens'), where('examId', '==', examId)));
+        for (const tDoc of tSnap.docs) {
+          await deleteDoc(doc(db, 'launchTokens', tDoc.id));
+        }
+      } catch (e) {
+        console.warn('Error deleting tokens:', e);
+      }
+
+      // 5. Delete main exam doc
       await deleteDoc(doc(db, 'exams', examId));
 
       setTargetExamToDelete(null);
@@ -199,8 +246,9 @@ export const AdminExamsPage: React.FC = () => {
                         <Button
                           variant="outline"
                           size="sm"
+                          isLoading={launchingId === exam.id}
                           icon={<Play className="w-3.5 h-3.5 text-purple-600" />}
-                          onClick={() => navigate(`/exam/${exam.id}?adminTest=true`)}
+                          onClick={() => handleAttemptTest(exam)}
                         >
                           Attempt Test
                         </Button>

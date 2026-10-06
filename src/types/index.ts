@@ -102,7 +102,7 @@ export interface ExamAttempt {
   score?: number;
   totalMarks?: number;
   resultVisible: boolean;
-  answers: Record<string, StudentAnswer>;
+  answers?: Record<string, StudentAnswer>;
   questionOrder: string[]; // shuffled list of question IDs for this attempt
   initialShuffledCodeLines?: Record<string, string[]>; // initial shuffled lines per code-reorder question
 }
