@@ -9,7 +9,7 @@
     "secure-exam:start": "tsc -p tsconfig.electron.json && electron .",
     "secure-exam:dev": "concurrently \"npm run dev\" \"wait-on http://localhost:5176 && npm run secure-exam:start\"",
     "secure-exam:build": "npm run build && tsc -p tsconfig.electron.json && electron-builder",
-    "build": "tsc -b && vite build",
+    "build": "tsc -p tsconfig.electron.json && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },

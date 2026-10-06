@@ -216,6 +216,14 @@ app.whenReady().then(() => {
     });
   }
 
+  // Admin kiosk test handler (enabled in development or when ADMIN_KIOSK_TEST=true)
+  if (process.env.NODE_ENV === 'development' || process.env.ADMIN_KIOSK_TEST === 'true') {
+    ipcMain.handle('open-kiosk-test', async (_event, targetUrl: string) => {
+      // Force kiosk mode window for admin testing purposes
+      createSecureExamWindow(targetUrl);
+    });
+  }
+
   ipcMain.handle('close-secure-exam', () => {
     if (secureWindow && !secureWindow.isDestroyed()) {
       (secureWindow as any).isSubmittedCleanly = true;
