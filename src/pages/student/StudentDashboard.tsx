@@ -94,6 +94,22 @@ export const StudentDashboard: React.FC = () => {
         </form>
       </Card>
 
+      {/* Download Secure Browser Card */}
+      <Card title="Required Software">
+        <div className="space-y-4 text-center">
+          <p className="text-sm text-slate-600">
+            You must install the SARA EXAMS Secure Browser before taking any examination.
+          </p>
+          <Button
+            variant="outline"
+            className="w-full justify-center bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 font-bold"
+            onClick={() => window.open('https://drive.google.com/file/d/1bJPPYapgKQMkPE8634ga-GXzO-1LTxF1/view?usp=sharing', '_blank')}
+          >
+            Download Secure Exam Browser (.exe)
+          </Button>
+        </div>
+      </Card>
+
       <div className="p-4 bg-white rounded-xl border border-slate-200 text-xs text-slate-500 space-y-2">
         <div className="flex items-center gap-2 font-semibold text-slate-700">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />

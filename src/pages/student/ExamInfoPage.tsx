@@ -144,9 +144,20 @@ export const ExamInfoPage: React.FC = () => {
             {available ? 'START EXAM NOW' : 'EXAM NOT AVAILABLE AT THIS TIME'}
           </Button>
 
-          <p className="text-center text-xs text-slate-500 mt-2">
-            Requires <strong>SARA EXAMS Secure Exam</strong> installed. Not installed? Download installer from admin/it.
-          </p>
+          <div className="text-center text-xs text-slate-500 mt-4 space-y-1">
+            <p>Requires <strong>SARA EXAMS Secure Browser</strong> installed.</p>
+            <p>
+              Not installed?{' '}
+              <a 
+                href="https://drive.google.com/file/d/1bJPPYapgKQMkPE8634ga-GXzO-1LTxF1/view?usp=sharing"
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:underline font-bold"
+              >
+                Download Installer (.exe) here
+              </a>
+            </p>
+          </div>
 {errorMessage && (
   <div className="mt-4 p-2 bg-red-50 text-red-800 border border-red-200 rounded">
     {errorMessage}
